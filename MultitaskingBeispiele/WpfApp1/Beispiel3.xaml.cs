@@ -25,6 +25,8 @@ namespace WpfApp1
       InitializeComponent();
     }
 
+    private CancellationTokenSource cancellationTokenSource;
+
     private async void BTNStart_Click(object sender, RoutedEventArgs e)
     {
       BTNStart.IsEnabled = false;
@@ -35,16 +37,63 @@ namespace WpfApp1
       //    Task.Run(Inkrementieren).ContinueWith(t => BTNStart.IsEnabled = true, TaskScheduler.FromCurrentSynchronizationContext());
       //  }, TaskScheduler.FromCurrentSynchronizationContext());
 
-      await Task.Run(Inkrementieren);
+      //await Task.Run(Inkrementieren);
+
+      using (cancellationTokenSource = new CancellationTokenSource())
+      {
+
+        var ergebnis = await Berechnen();
+        LBL.Content = $"Zwischenergebnis: {ergebnis}";
+        BTNStop.IsEnabled = true;
+
+        var progress = new Progress<int>(wert => LBL.Content = wert);
+        Task t;
+        try
+        {
+          t = Inkrementieren(progress, cancellationTokenSource.Token);
+          //await t.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
+          await t;
+        }
+        catch (Exception ex)
+        {
+        }
+      }
+
       BTNStart.IsEnabled = true;
+      BTNStop.IsEnabled= false;
     }
 
-    private void Inkrementieren()
+    private async Task<int> Berechnen()
     {
-      for (int i = 0; i < 5; i++)
+      await Task.Delay(2000);
+      return 42;
+    }
+
+    private Task Inkrementieren(IProgress<int> progress, CancellationToken cancellationToken)
+    {
+      return Task.Run(async () =>
       {
-        Thread.Sleep(1000);
-      }
+        for (int i = 0; i < 10; i++)
+        {
+          if (cancellationToken.IsCancellationRequested)
+          {
+            //... aufräumen
+            // kein return;
+          }
+
+          cancellationToken.ThrowIfCancellationRequested();
+
+          //throw new ApplicationException("ohh...");
+          //Thread.Sleep(100000);
+          await Task.Delay(1000, cancellationToken);
+          progress.Report(i);
+        }
+      });
+    }
+
+    private void BTNStop_Click(object sender, RoutedEventArgs e)
+    {
+      cancellationTokenSource.Cancel();
     }
   }
 }

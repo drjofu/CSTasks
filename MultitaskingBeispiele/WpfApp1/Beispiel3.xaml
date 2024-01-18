@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d" FontSize="25"
         Title="Beispiel3" Height="450" Width="800">
-    <Grid>
+  <Grid>
     <Button Name="BTNStart" Content="Start" HorizontalAlignment="Left" Margin="129,71,0,0" VerticalAlignment="Top" Click="BTNStart_Click"/>
-    <Button Name="BTNStop" Content="Stopp" HorizontalAlignment="Left" Margin="322,76,0,0" VerticalAlignment="Top"/>
+    <Button Name="BTNStop" Content="Stopp" IsEnabled="False" HorizontalAlignment="Left" Margin="322,76,0,0" VerticalAlignment="Top" Click="BTNStop_Click"/>
     <Label Name="LBL" Content="Label" HorizontalAlignment="Left" Margin="208,173,0,0" VerticalAlignment="Top"/>
 
   </Grid>
